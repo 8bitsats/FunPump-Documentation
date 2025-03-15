@@ -1,205 +1,162 @@
 # Voice Commands
 
-FunPump integrates a sophisticated voice interface that allows users to launch tokens and execute trades using natural language. This feature combines OpenAI's GPT-4, Deepgram's real-time speech recognition, and LiveKit's audio streaming capabilities.
+FunPump's voice integration enables natural language interactions for token launches and trading. Powered by OpenAI, Deepgram, and LiveKit, it provides an intuitive way to interact with the platform.
 
-## Overview
+## Core Components
 
-The voice interface provides a natural way to interact with FunPump:
-- Launch new tokens verbally
-- Execute trades through voice commands
-- Get market insights and analytics
-- Navigate virtual environments
-
-## Components
-
-### Speech Recognition
-- Real-time transcription via Deepgram
-- Low-latency audio processing
-- Multi-language support
-- Noise cancellation
-
-### Natural Language Processing
-- GPT-4 powered understanding
-- Context-aware responses
-- Intent recognition
-- Parameter extraction
-
-### Voice Response
+- Deepgram for real-time speech recognition
+- OpenAI GPT-4 for natural language understanding
 - Text-to-speech using OpenAI TTS-1
-- Natural-sounding feedback
-- Dynamic response generation
-- Error handling notifications
+- LiveKit for audio streaming
 
-## Common Voice Commands
+## Voice Assistant Features
 
-### Token Launch Commands
-```
-"Launch a new token called [name] with symbol [symbol]"
-"Create a compressed token with [parameters]"
-"Set initial price to [amount] SOL"
-"Add [amount] SOL initial liquidity"
-```
+- Token launch guidance
+- Trading execution
+- Market analysis
+- Price checks
+- Portfolio management
 
-### Trading Commands
-```
-"Buy [amount] tokens at market price"
-"Sell [amount] tokens"
-"Show me the current price"
-"What's the price impact for buying [amount]?"
-```
+## Command Categories
 
-### Virtual Environment Commands
-```
-"Create a new virtual environment"
-"Join environment [name]"
-"Show me the bonding curve"
-"Simulate a trade of [amount] tokens"
+- Launch Commands
+- Trading Commands
+- Analysis Commands
+- System Commands
+
+## Launch Commands
+
+```typescript
+// Example: Launch a new token
+Assistant: "What would you like to name your token?"
+User: "Moon Rocket"
+Assistant: "What symbol should we use?"
+User: "MOON"
 ```
 
-### Information Commands
+## Trading Commands
+
+```typescript
+// Example: Buy tokens
+Assistant: "How many tokens would you like to buy?"
+User: "100 MOON tokens"
+Assistant: "Current price is 0.1 SOL per token. Would you like to proceed?"
+User: "Yes, execute the trade"
 ```
-"What's my current reward tier?"
-"Show my unclaimed rewards"
-"What's the trading volume today?"
-"Give me market insights for [token]"
+
+## Analysis Commands
+
+```typescript
+// Example: Price check
+Assistant: "The current price of MOON is 0.15 SOL"
+User: "What's the 24-hour volume?"
+Assistant: "The 24-hour trading volume for MOON is 5000 SOL"
 ```
 
-## Voice Assistant Flow
+## System Commands
 
-1. **Initialization**
-   ```typescript
-   const voiceAssistant = new VoiceAssistant({
-     deepgramApiKey: process.env.DEEPGRAM_API_KEY,
-     openAiApiKey: process.env.OPENAI_API_KEY,
-     liveKitUrl: process.env.LIVEKIT_URL
-   });
-   ```
+```typescript
+// Example: Help request
+User: "What commands are available?"
+Assistant: "I can help you with:
+1. Token launches ('launch a token')
+2. Trading ('buy', 'sell')
+3. Price checks ('what's the price of')
+4. Market analysis ('show volume')"
+```
 
-2. **Command Processing**
-   ```typescript
-   voiceAssistant.onTranscript(async (transcript) => {
-     const intent = await voiceAssistant.processIntent(transcript);
-     const response = await voiceAssistant.executeCommand(intent);
-     await voiceAssistant.speak(response);
-   });
-   ```
+## Integration Example
 
-3. **Parameter Extraction**
-   ```typescript
-   interface TokenLaunchParams {
-     name: string;
-     symbol: string;
-     initialPrice?: number;
-     liquidity?: number;
-     isCompressed?: boolean;
-   }
+```typescript
+const voiceAssistant = new VoiceAssistant({
+  deepgramKey: process.env.DEEPGRAM_KEY,
+  openaiKey: process.env.OPENAI_KEY,
+  livekitToken: process.env.LIVEKIT_TOKEN
+});
 
-   const params = await voiceAssistant.extractTokenParams(transcript);
-   ```
+// Start voice session
+await voiceAssistant.start();
 
-## Error Handling
+// Handle commands
+voiceAssistant.onCommand(async (command) => {
+  switch (command.intent) {
+    case 'LAUNCH_TOKEN':
+      await handleTokenLaunch(command.parameters);
+      break;
+    case 'EXECUTE_TRADE':
+      await handleTrade(command.parameters);
+      break;
+  }
+});
+```
 
-The voice interface includes robust error handling:
+## Voice Processing Pipeline
 
-1. **Unclear Commands**
-   - Request clarification
-   - Provide examples
-   - Suggest alternatives
+1. Audio capture using browser APIs
+2. Real-time streaming to Deepgram
+3. Text processing with GPT-4
+4. Command execution
+5. Response generation
+6. Text-to-speech playback
 
-2. **Network Issues**
-   - Automatic reconnection
-   - State preservation
-   - Feedback to user
+## Setup Requirements
 
-3. **Parameter Validation**
-   - Confirm critical parameters
-   - Validate values
-   - Request corrections
+- Modern web browser
+- Microphone access
+- Stable internet connection
+- Connected Solana wallet
 
 ## Best Practices
 
-### Clear Speech
-- Speak naturally but clearly
-- Use defined command patterns
-- Wait for confirmations
-- Check feedback
+1. Speak clearly and naturally
+2. Wait for assistant confirmation
+3. Review commands before execution
+4. Test in virtual environment first
 
-### Environment
-- Minimize background noise
-- Use a good microphone
-- Maintain stable connection
-- Monitor voice feedback
+## Error Handling
 
-### Command Structure
-- Start with action verb
-- Specify parameters clearly
-- Use standard terminology
-- Confirm important actions
-
-## Examples
-
-### Token Launch Example
-```
-User: "Launch a new token called Moon Rocket with symbol MOON"
-Assistant: "I'll help you launch Moon Rocket token. What initial price would you like to set?"
-User: "Set initial price to 0.1 SOL"
-Assistant: "Got it. Would you like to add initial liquidity?"
-User: "Yes, add 10 SOL liquidity"
-Assistant: "I'll create MOON token with 0.1 SOL initial price and 10 SOL liquidity. Should I proceed?"
-User: "Yes, launch it"
-Assistant: "Launching Moon Rocket token... Transaction confirmed! Your token is now live."
+```typescript
+voiceAssistant.onError((error) => {
+  switch (error.type) {
+    case 'SPEECH_RECOGNITION':
+      // Handle speech recognition errors
+      break;
+    case 'COMMAND_PROCESSING':
+      // Handle command processing errors
+      break;
+    case 'EXECUTION':
+      // Handle execution errors
+      break;
+  }
+});
 ```
 
-### Trading Example
-```
-User: "What's the current price of MOON?"
-Assistant: "MOON is currently trading at 0.15 SOL"
-User: "Buy 100 MOON tokens"
-Assistant: "The price impact for buying 100 MOON would be 2%. Would you like to proceed?"
-User: "Yes, execute the trade"
-Assistant: "Executing trade... Transaction confirmed! You've received 100 MOON tokens."
-```
+## Support and Resources
 
-## Security Considerations
+- [Voice Command Guide](https://docs.funpump.ai/voice-commands)
+- [API Reference](https://api.funpump.ai/voice)
+- [Discord Support](https://discord.funpump.ai)
+- [Video Tutorials](https://learn.funpump.ai/voice)
 
-### Voice Authentication
-- Wallet confirmation required
-- Critical action verification
-- Multi-factor for large trades
-- Session management
+## Security Notes
 
-### Privacy
-- Local audio processing
-- Encrypted transmission
-- Data retention policies
-- User consent management
+1. Voice authentication is supplementary
+2. Critical actions require wallet signature
+3. Voice data is not stored permanently
+4. All communication is encrypted
+
+## Rate Limits
+
+1. Maximum command length: 10 seconds
+2. Commands per minute: 20
+3. Concurrent sessions: 1
+4. Daily usage limit: 1000 commands
 
 ## Troubleshooting
 
-### Common Issues
-1. **Recognition Problems**
-   - Check microphone
-   - Reduce background noise
-   - Speak more clearly
-   - Update browser
+1. Check microphone permissions
+2. Verify internet connection
+3. Ensure wallet is connected
+4. Clear browser cache if needed
 
-2. **Command Issues**
-   - Review command structure
-   - Check parameter values
-   - Verify wallet connection
-   - Confirm network status
-
-3. **Connection Problems**
-   - Check internet connection
-   - Verify WebSocket status
-   - Reconnect wallet
-   - Clear browser cache
-
-## Future Enhancements
-
-Planned improvements include:
-- Multi-language support
-- Custom command creation
-- Voice profile training
-- Advanced market analysis
-- Predictive suggestions
+For additional support, visit [help.funpump.ai](https://help.funpump.ai)

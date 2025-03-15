@@ -63,7 +63,7 @@ Efficient token launches using:
 
 ## Getting Started
 
-1. Visit [FunPump Platform](https://funpump.io)
+1. Visit [FunPump Platform](https://funpump.ai)
 2. Connect your Solana wallet
 3. Start with a virtual environment
 4. Create your first token
@@ -80,10 +80,10 @@ For detailed instructions, check out our [Quick Start Guide](getting-started/qui
 
 ## Community and Support
 
-- Join our [Discord](https://discord.gg/funpump)
-- Follow us on [Twitter](https://twitter.com/funpump)
-- Visit our [GitHub](https://github.com/funpump)
-- Read our [Blog](https://blog.funpump.io)
+- Join our [Discord](https://discord.funpump.ai)
+- Follow us on [Twitter](https://twitter.funpump.ai)
+- Visit our [GitHub](https://github.funpump.ai)
+- Read our [Blog](https://blog.funpump.ai)
 
 ## Contributing
 

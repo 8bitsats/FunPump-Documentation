@@ -1,57 +1,30 @@
 # Virtual Environments
 
-FunPump's virtual environments provide a risk-free space for testing token launches, trading strategies, and market dynamics. This feature allows users to simulate real market conditions without using actual SOL or tokens.
+FunPump's virtual environments provide a risk-free way to test token launches, trading strategies, and market dynamics. These environments simulate real market conditions while allowing users to experiment without using real assets.
 
-## Overview
+## Core Features
 
-Virtual environments enable users to:
-- Test token launches before going live
-- Simulate trading scenarios
-- Interact with other users in real-time
-- Analyze market impact and liquidity
+- Real-time price simulation
+- Live trading environment
+- Community interaction
+- Market impact analysis
 
-## Features
+## Key Benefits
 
-### Real-Time Trading
-- Live price updates
-- Order book simulation
-- Market impact visualization
-- Trade history tracking
+- Risk-free testing
+- Instant feedback
+- Community collaboration
+- Strategy validation
 
-### Interactive Chat
-- Real-time messaging
-- User presence indicators
-- Trading discussions
-- Community building
+## Components
 
-### Price Visualization
-- Dynamic bonding curves
-- Price impact analysis
-- Volume indicators
-- Technical analysis tools
+- Price simulator
+- Trading engine
+- Chat system
+- Analytics dashboard
 
 ## Implementation
 
-### WebSocket Integration
-```typescript
-const { isConnected, sendMessage } = useWebSocket({
-  reconnectAttempts: 5,
-  reconnectInterval: 3000,
-  heartbeatInterval: 30000
-});
-
-// Subscribe to environment updates
-useEffect(() => {
-  if (isConnected) {
-    sendMessage({
-      type: 'SUBSCRIBE_ENVIRONMENT',
-      data: { environmentId }
-    });
-  }
-}, [isConnected, environmentId]);
-```
-
-### Virtual Environment Context
 ```typescript
 interface VirtualEnvironment {
   id: string;
@@ -60,207 +33,179 @@ interface VirtualEnvironment {
   virtualSolReserves: bigint;
   virtualTokenReserves: bigint;
   participants: number;
-  chatHistory: ChatMessage[];
   trades: VirtualTrade[];
 }
-
-const VirtualEnvironmentContext = createContext<VirtualEnvironmentContextType | null>(null);
 ```
 
-### Bonding Curve Visualization
-```typescript
-interface CurveDataPoint {
-  solAmount: number;
-  tokenAmount: number;
-  price: number;
-  isCurrentPoint?: boolean;
-}
+## State Management
 
-function BondingCurveVisualizer({
-  mintAddress,
-  environmentId,
-  isVirtual = false
-}: BondingCurveVisualizerProps) {
-  // Implementation details...
+```typescript
+class VirtualEnvironmentManager {
+  private environments: Map<string, VirtualEnvironment>;
+  private subscriptions: Map<string, Set<WebSocket>>;
+
+  async createEnvironment(config: EnvironmentConfig): Promise<string> {
+    const id = generateId();
+    const env = new VirtualEnvironment(config);
+    this.environments.set(id, env);
+    return id;
+  }
 }
 ```
 
-## Usage Guide
+## Trading Engine
 
-### Creating a Virtual Environment
-
-1. **Initialize Environment**
 ```typescript
-const createEnvironment = async () => {
-  const environment = await virtualEnvironmentService.create({
-    name: "Test Environment",
-    initialLiquidity: 1000n * LAMPORTS_PER_SOL,
-    maxParticipants: 100
-  });
-  return environment;
-};
+class VirtualTradingEngine {
+  async executeTrade(
+    environmentId: string,
+    trade: VirtualTrade
+  ): Promise<TradeResult> {
+    const env = this.getEnvironment(environmentId);
+    return env.processTrade(trade);
+  }
+}
 ```
 
-2. **Join Environment**
+## Price Simulation
+
 ```typescript
-const joinEnvironment = async (envId: string) => {
-  if (!publicKey) throw new Error("Connect wallet first");
-  
-  await virtualEnvironmentService.join(envId, publicKey);
-  // Subscribe to updates...
-};
+interface PriceSimulator {
+  getCurrentPrice(): number;
+  simulateImpact(amount: bigint): number;
+  updateReserves(solDelta: bigint, tokenDelta: bigint): void;
+}
 ```
 
-3. **Execute Virtual Trade**
+## WebSocket Integration
+
 ```typescript
-const executeVirtualTrade = async (
-  amount: bigint,
-  isBuy: boolean
-) => {
-  const tx = await virtualEnvironmentService.createTradeTransaction(
-    amount,
-    isBuy
-  );
-  // Process virtual transaction...
-};
-```
+const ws = new WebSocket('wss://ws.funpump.ai/virtual');
 
-### Chat Integration
-
-1. **Send Message**
-```typescript
-const sendChatMessage = (message: string) => {
-  if (!currentEnvironment || !publicKey) return;
-
-  ws?.send(JSON.stringify({
-    type: 'CHAT_MESSAGE',
-    data: {
-      environmentId: currentEnvironment.id,
-      message
-    }
-  }));
-};
-```
-
-2. **Handle Messages**
-```typescript
-const handleWebSocketMessage = (event: MessageEvent) => {
+ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
   switch (data.type) {
-    case 'CHAT_MESSAGE':
-      handleNewChatMessage(data.data);
+    case 'PRICE_UPDATE':
+      updatePrice(data.price);
       break;
     case 'TRADE_EXECUTED':
-      handleTradeUpdate(data.data);
+      handleTrade(data.trade);
       break;
-    // Handle other message types...
   }
 };
 ```
 
-## Market Simulation
+## Usage Example
 
-### Price Impact
 ```typescript
-const simulateMarketImpact = async (
-  amount: bigint,
-  isBuy: boolean
-): Promise<{
-  expectedPrice: bigint;
-  priceImpact: number;
-  minimumReceived: bigint;
-}> => {
-  // Calculate expected output and price impact...
-  return simulation;
-};
+// Create a new environment
+const envId = await virtualEnv.create({
+  name: "Test Environment",
+  initialPrice: 0.1,
+  initialLiquidity: 1000n
+});
+
+// Execute a trade
+const result = await virtualEnv.executeTrade({
+  environmentId: envId,
+  amount: 100n,
+  isBuy: true
+});
 ```
 
-### Virtual Balances
+## Error Handling
+
 ```typescript
-interface VirtualBalance {
-  sol: bigint;
-  tokens: Map<string, bigint>;
+try {
+  await virtualEnv.executeTrade(trade);
+} catch (error) {
+  if (error instanceof InsufficientLiquidityError) {
+    // Handle liquidity error
+  } else if (error instanceof PriceImpactError) {
+    // Handle price impact error
+  }
+}
+```
+
+## Analytics
+
+```typescript
+interface EnvironmentAnalytics {
+  volume24h: bigint;
+  trades24h: number;
+  uniqueTraders: number;
+  priceChange: number;
 }
 
-const updateVirtualBalance = (
-  trade: VirtualTrade,
-  currentBalance: VirtualBalance
-): VirtualBalance => {
-  // Update balances based on trade...
-  return newBalance;
-};
+const analytics = await virtualEnv.getAnalytics(envId);
 ```
 
-## Converting to Real Tokens
+## Configuration Options
 
-### Process
-1. Verify virtual token balance
-2. Create conversion transaction
-3. Initialize real token
-4. Transfer assets
-5. Close virtual position
+### Initial Settings
 
-### Implementation
 ```typescript
-const convertToRealToken = async (
-  compressedNFT: boolean = false
-): Promise<TransactionSignature> => {
-  // Validation
-  if (!currentEnvironment || !publicKey) {
-    throw new Error("Invalid environment state");
-  }
+interface EnvironmentConfig {
+  name: string;
+  initialPrice: number;
+  initialLiquidity: bigint;
+  maxSlippage?: number;
+  tradingEnabled?: boolean;
+}
+```
 
-  // Create conversion transaction
-  const tx = await virtualEnvironmentService
-    .createConversionTransaction(
-      currentEnvironment.id,
-      publicKey,
-      compressedNFT
-    );
+### Trading Limits
 
-  // Execute transaction
-  return await sendAndConfirmTransaction(connection, tx, [payer]);
-};
+```typescript
+interface TradingLimits {
+  maxTradeSize: bigint;
+  minTradeSize: bigint;
+  maxPriceImpact: number;
+}
+```
+
+### User Settings
+
+```typescript
+interface UserSettings {
+  defaultSlippage: number;
+  autoExecute: boolean;
+  notifications: boolean;
+}
 ```
 
 ## Best Practices
 
-### For Users
-1. Start with small test amounts
-2. Experiment with different scenarios
-3. Monitor market impact
-4. Engage with community
-5. Document findings
+1. Testing Strategy
+   - Start with small trades
+   - Monitor price impact
+   - Track liquidity changes
+   - Analyze trade history
 
-### For Developers
-1. Implement proper error handling
-2. Maintain WebSocket connection
-3. Update UI in real-time
-4. Validate all inputs
-5. Handle edge cases
+2. Risk Management
+   - Set stop-loss levels
+   - Monitor position sizes
+   - Track portfolio value
+   - Use limit orders
 
-## Security Considerations
+3. Community Interaction
+   - Share insights
+   - Discuss strategies
+   - Provide feedback
+   - Help new users
 
-### Data Privacy
-- Isolated environments
-- Secure WebSocket connections
-- Limited data exposure
-- User anonymity options
+## Support Resources
 
-### Transaction Safety
-- Virtual transaction validation
-- Rate limiting
-- Balance checks
-- State verification
+1. [Documentation](https://docs.funpump.ai/virtual)
+2. [API Reference](https://api.funpump.ai/virtual)
+3. [Discord](https://discord.funpump.ai)
+4. [Tutorials](https://learn.funpump.ai/virtual)
 
-## Future Enhancements
+## Troubleshooting
 
-Planned improvements include:
-1. Multiple token support
-2. Advanced trading features
-3. Market maker simulation
-4. Historical data analysis
-5. Custom scenario creation
-6. Integration with AI trading bots
-7. Cross-environment trading
-8. Enhanced analytics tools
+1. Connection Issues
+2. Trade Execution Problems
+3. Price Display Errors
+4. Analytics Delays
+
+For help, visit [help.funpump.ai](https://help.funpump.ai)
